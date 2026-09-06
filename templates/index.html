@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gesturo — Gesture Gaming Studio</title>
+    <!-- NO meta http-equiv="refresh" to ensure ZERO screen blinking -->
+    <style>
+        :root {
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --amber: #f59e0b;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+            --shadow-md: 0 6px 18px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+            --shadow-lg: 0 16px 36px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .studio-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e0e7ff;
+            color: #4338ca;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        h1 {
+            font-size: 34px;
+            font-weight: 900;
+            margin: 0 0 6px 0;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin: 0;
+            max-width: 540px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 520px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Segmented Mode Selector */
+        .mode-selector {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 6px;
+            display: flex;
+            width: 100%;
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px 14px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            background: transparent;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .mode-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: #f8fafc;
+            color: var(--text-main);
+        }
+
+        /* Video Frame / Viewport */
+        .game-viewport {
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewport-topbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--card-border);
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .game-viewport img {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: #1e293b;
+        }
+
+        /* Live Gesture Recognition Floating HUD */
+        .gesture-hud {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 10px 16px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hud-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .hud-action {
+            font-size: 14px;
+            font-weight: 800;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .stat-number.green { color: var(--success); }
+        .stat-number.blue { color: var(--primary); }
+        .stat-number.gold { color: var(--amber); }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .controls form {
+            flex: 1;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-start {
+            background: var(--success);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+        .btn-start:hover {
+            background: var(--success-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-restart {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+        .btn-restart:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Instruction Card */
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px;
+            width: 100%;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card h3 {
+            font-size: 15px;
+            font-weight: 800;
+            margin: 0 0 12px 0;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guide-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .guide-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .guide-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .guide-pill {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        /* Settings Bar */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .settings-btn {
+            background: #f8fafc;
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.15s ease;
+        }
+
+        .settings-btn:hover {
+            background: #e2e8f0;
+        }
+
+        footer {
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="studio-pill">✨ GESTURE CONTROL PLATFORM v2.2</div>
+        <h1>🎮 Gesturo</h1>
+        <p class="tagline">
+            {% if mode == 'runner' %}
+            Protect the boy running down the highway! Steer left/right with your hand, close fist then open to jump, and hold fist to pause.
+            {% else %}
+            Master the block puzzle! Move your hand to aim, pinch or make a fist to grab pieces, and open your palm to place.
+            {% endif %}
+        </p>
+    </header>
+
+    <div class="container">
+
+        <!-- Mode Switcher -->
+        <div class="mode-selector">
+            <form action="{{ url_for('select_mode') }}" method="post" style="flex:1;">
+                <input type="hidden" name="mode" value="runner">
+                <button type="submit" class="mode-btn {{ 'active' if mode == 'runner' else '' }}">
+                    🏃 Road Runner
+                </button>
+            </form>
+            <form action="{{ url_for('select_mode') }}" method="post" style="flex:1;">
+                <input type="hidden" name="mode" value="block_blast">
+                <button type="submit" class="mode-btn {{ 'active' if mode == 'block_blast' else '' }}">
+                    🧩 Block Blast
+                </button>
+            </form>
+        </div>
+
+        <!-- Video Stream Viewport -->
+        <div class="game-viewport">
+            <div class="viewport-topbar">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span id="cam-status">Webcam Active &bull; 30 FPS</span>
+                </div>
+                <div>{{ 'Asphalt Highway' if mode == 'runner' else '8x8 Puzzle Grid' }}</div>
+            </div>
+            <!-- Video feed updates smoothly without page reloads -->
+            <img src="{{ url_for('video_feed') }}" alt="Live Game Stream">
+        </div>
+
+        <!-- Hidden webcam capture rig: the browser grabs YOUR camera and posts
+             frames to the server for gesture recognition. The server itself has
+             no camera (it's running in the cloud), so this capture must happen
+             here, client-side. Nothing here is shown to the player. -->
+        <video id="webcam-video" autoplay playsinline muted style="display:none;"></video>
+        <canvas id="webcam-canvas" style="display:none;"></canvas>
+
+        <!-- Live Gesture Recognition Feedback (Zero Blink) -->
+        <div class="gesture-hud">
+            <span class="hud-label">LIVE HAND DETECTOR</span>
+            <span class="hud-action" id="hud-gesture-action">Waiting for hand...</span>
+        </div>
+
+        <!-- Primary Controls -->
+        <div class="controls">
+            <form action="{{ url_for('start') }}" method="post">
+                <button type="submit" class="action-btn btn-start">▶ Play Game</button>
+            </form>
+            <form action="{{ url_for('restart') }}" method="post">
+                <button type="submit" class="action-btn btn-restart">🔄 Restart</button>
+            </form>
+        </div>
+
+        <!-- Stats Grid (Smoothly updated via silent background poll) -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-title">STATUS</span>
+                <span class="stat-number green" id="stat-state">{{ state.upper() }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">SCORE</span>
+                <span class="stat-number blue" id="stat-score">{{ score }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title">BEST</span>
+                <span class="stat-number gold" id="stat-high-score">{{ high_score }}</span>
+            </div>
+            <div class="stat-card">
+                {% if mode == 'runner' %}
+                <span class="stat-title">DISTANCE</span>
+                <span class="stat-number" id="stat-detail">{{ details.distance_m | default(0) }}m</span>
+                {% else %}
+                <span class="stat-title">COMBO</span>
+                <span class="stat-number" id="stat-detail">{{ details.combo_streak | default(0) }}x</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Exact User Gesture Instructions -->
+        <div class="card">
+            <h3>📖 {{ 'Road Runner Controls' if mode == 'runner' else 'Block Blast Controls' }}</h3>
+            <div class="guide-list">
+                {% if mode == 'runner' %}
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>👈 Hand to the Left</span>
+                    </div>
+                    <span class="guide-pill" style="background:#e0f2fe; color:#0369a1;">Steer Left</span>
+                </div>
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>👉 Hand to the Right</span>
+                    </div>
+                    <span class="guide-pill" style="background:#e0f2fe; color:#0369a1;">Steer Right</span>
+                </div>
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>✊ Fist then 🖐 Open Hand</span>
+                    </div>
+                    <span class="guide-pill" style="background:#dcfce7; color:#15803d;">BOY JUMPS!</span>
+                </div>
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>✊ Hold Closed Fist</span>
+                    </div>
+                    <span class="guide-pill" style="background:#fee2e2; color:#b91c1c;">STOP / PAUSE GAME</span>
+                </div>
+                {% else %}
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>✋ Move hand in air</span>
+                    </div>
+                    <span class="guide-pill" style="background:#e0f2fe; color:#0369a1;">Aim 2D Cursor</span>
+                </div>
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>🤏 Pinch OR ✊ Closed Fist</span>
+                    </div>
+                    <span class="guide-pill" style="background:#dcfce7; color:#15803d;">Grab Tray Piece</span>
+                </div>
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>🖐 Open Hand over Grid</span>
+                    </div>
+                    <span class="guide-pill" style="background:#e0e7ff; color:#3730a3;">Place on Green Cells</span>
+                </div>
+                <div class="guide-item">
+                    <div class="guide-action">
+                        <span>⚡ Fill Full Row or Column</span>
+                    </div>
+                    <span class="guide-pill" style="background:#fef3c7; color:#b45309;">Line Clear &amp; Combo</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Camera & Display Settings -->
+        <div class="card">
+            <h3 style="font-size:14px; margin-bottom:10px;">⚙️ Camera &amp; Calibration Settings</h3>
+            <div class="settings-grid">
+                <form action="{{ url_for('toggle_pip') }}" method="post">
+                    <button type="submit" class="settings-btn">
+                        {{ '📷 Hide Preview' if show_camera_pip else '📷 Show Preview' }}
+                    </button>
+                </form>
+                <form action="{{ url_for('toggle_mirror') }}" method="post">
+                    <button type="submit" class="settings-btn">
+                        {{ '🪞 Mirror: ON' if camera_mirror else '🪞 Mirror: OFF' }}
+                    </button>
+                </form>
+                <form action="{{ url_for('calibrate') }}" method="post">
+                    <button type="submit" class="settings-btn">
+                        🎯 Calibrate Neutral Hand
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        Gesturo Game Studio &bull; Zero Blinking &bull; Smooth 30 FPS Stream &bull; Pure Python &amp; MediaPipe
+    </footer>
+
+    <!-- Webcam capture: reads the PLAYER's own camera in the browser and posts
+         frames to /process_frame so the server can run gesture recognition on
+         them. This is required for cloud hosting (Render, Streamlit Cloud,
+         etc.) where the server itself has no webcam of its own. -->
+    <script>
+        (function () {
+            var video = document.getElementById('webcam-video');
+            var canvas = document.getElementById('webcam-canvas');
+            var ctx = canvas.getContext('2d');
+            // Match the server's MediaPipe inference resolution exactly so it
+            // never has to re-resize the frame we send (one less CPU-bound
+            // step per frame, on top of avoiding a mismatch entirely).
+            var CAPTURE_W = {{ inference_width }};
+            var CAPTURE_H = {{ inference_height }};
+            // The server now hands off frames to a dedicated inference
+            // thread instead of processing them inline, so this fetch()
+            // resolves almost instantly regardless of MediaPipe's speed -
+            // safe to send at a brisk, steady cadence.
+            var SEND_INTERVAL_MS = 66; // ~15 fps upload
+            canvas.width = CAPTURE_W;
+            canvas.height = CAPTURE_H;
+
+            var sending = false;
+
+            function setCamStatus(text, ok) {
+                var el = document.getElementById('cam-status');
+                if (el) el.textContent = text;
+                var dot = document.querySelector('.status-dot');
+                if (dot) dot.style.background = ok ? '' : '#ef4444';
+            }
+
+            function sendFrame() {
+                if (sending || video.readyState < 2) return;
+                sending = true;
+                ctx.drawImage(video, 0, 0, CAPTURE_W, CAPTURE_H);
+                canvas.toBlob(function (blob) {
+                    if (!blob) { sending = false; return; }
+                    fetch('/process_frame', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'image/jpeg' },
+                        body: blob,
+                    })
+                        .catch(function () { /* ignore transient network errors */ })
+                        .finally(function () { sending = false; });
+                }, 'image/jpeg', 0.6);
+            }
+
+            function startCapture() {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    setCamStatus('⚠ Camera not supported in this browser', false);
+                    return;
+                }
+                navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: CAPTURE_W }, height: { ideal: CAPTURE_H } },
+                    audio: false,
+                }).then(function (stream) {
+                    video.srcObject = stream;
+                    setCamStatus('Webcam Active • Sending to server', true);
+                    setInterval(sendFrame, SEND_INTERVAL_MS);
+                }).catch(function (err) {
+                    setCamStatus('⚠ Camera access denied — click the camera icon in your address bar and allow it, then reload', false);
+                });
+            }
+
+            startCapture();
+        })();
+    </script>
+
+    <!-- Silent, non-reloading background updater (Zero Blinking!) -->
+    <script>
+        function updateStats() {
+            fetch('/api/stats')
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (!data) return;
+                    var stateEl = document.getElementById('stat-state');
+                    if (stateEl) stateEl.textContent = data.state.toUpperCase();
+
+                    var scoreEl = document.getElementById('stat-score');
+                    if (scoreEl) scoreEl.textContent = data.score;
+
+                    var highEl = document.getElementById('stat-high-score');
+                    if (highEl) highEl.textContent = data.high_score;
+
+                    var detailEl = document.getElementById('stat-detail');
+                    if (detailEl) {
+                        if (data.mode === 'runner') {
+                            detailEl.textContent = (data.distance_m || 0) + 'm';
+                        } else {
+                            detailEl.textContent = (data.combo_streak || 0) + 'x';
+                        }
+                    }
+
+                    var hudEl = document.getElementById('hud-gesture-action');
+                    if (hudEl) {
+                        if (!data.camera_active) {
+                            hudEl.textContent = '⚠ Waiting for webcam permission...';
+                            hudEl.style.color = '#f59e0b';
+                        } else if (!data.hand_detected) {
+                            hudEl.textContent = '🔴 Show Hand to Camera';
+                            hudEl.style.color = '#ef4444';
+                        } else {
+                            if (data.gesture === 'jump') {
+                                hudEl.textContent = '🚀 JUMP!';
+                                hudEl.style.color = '#10b981';
+                            } else if (data.gesture === 'stop') {
+                                hudEl.textContent = '⏸️ STOP / PAUSED';
+                                hudEl.style.color = '#ef4444';
+                            } else if (data.lane === 0) {
+                                hudEl.textContent = '👈 Moving Left';
+                                hudEl.style.color = '#2563eb';
+                            } else if (data.lane === 2) {
+                                hudEl.textContent = '👉 Moving Right';
+                                hudEl.style.color = '#2563eb';
+                            } else {
+                                hudEl.textContent = '🟢 Running Centered';
+                                hudEl.style.color = '#10b981';
+                            }
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    // Fail silently, video stream is primary
+                });
+        }
+
+        // Poll silently every 800ms with zero page reload
+        setInterval(updateStats, 800);
+        updateStats();
+    </script>
+</body>
+</html>
